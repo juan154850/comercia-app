@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "552422971162",
+    "project_id": "comercia-app",
+    "storage_bucket": "comercia-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:552422971162:android:1bc65fd3643f4d12603ea3",
+        "android_client_info": {
+          "package_name": "com.comercia.store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSSVGm_jCX_kn-Df2UwL3G8WQ_8QWIcHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
