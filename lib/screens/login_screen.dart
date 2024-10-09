@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => RegisterScreen()),
+                                  builder: (context) => LoginScreen()),
                             );
                           },
                           child: const Text("Olvidaste tu contraseña?",
