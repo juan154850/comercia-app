@@ -1,11 +1,8 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
-
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/services/auth_service.dart';
 
-
 class ProfileScreen extends StatefulWidget {
-
   const ProfileScreen({super.key});
 
   @override
@@ -14,18 +11,30 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
-
   int _selectedIndex = 3;
+  late Trace _buildTrace;
 
-  // Método para cerrar sesión
+  @override
+  void initState() {
+    super.initState();
+    _buildTrace = FirebasePerformance.instance.newTrace('profile_screen_build');
+    _buildTrace.start();
+  }
+
+  @override
+  void dispose() {
+    _buildTrace.stop();
+    super.dispose();
+  }
+
   Future<void> _signOut(BuildContext context) async {
     await _authService.signOut();
+    // ignore: use_build_context_synchronously
     Navigator.pushReplacementNamed(context, '/login');
   }
 
   void _onItemTapped(int index) {
     if (index == 3) {
-      // Si el índice es 3 (Mi Perfil), navegar a la pantalla de perfil
       Navigator.pushNamed(context, '/profile');
     } else if (index == 0) {
       Navigator.pushNamed(context, '/home');
@@ -45,19 +54,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi cuenta'),
-        centerTitle: true, // Centrar el título del AppBar
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Espacio para otros elementos visuales en el futuro
             const SizedBox(height: 20.0),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: const Color(0xFF007AFF), // Color de fondo del botón
+                backgroundColor: const Color(0xFF007AFF),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   side: const BorderSide(color: Color(0xFF007AFF)),
@@ -72,8 +80,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
-            bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, // Evita que las opciones se redimensionen
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -92,9 +100,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             label: 'Mi Perfil',
           ),
         ],
-        currentIndex: _selectedIndex, // Índice de la opción seleccionada
-        selectedItemColor: Colors.blue, // Color del ítem seleccionado
-        onTap: _onItemTapped, // Método que se llama al seleccionar una opción
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
       ),
     );
   }
