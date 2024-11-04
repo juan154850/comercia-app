@@ -17,9 +17,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-  FirebaseCrashlytics.instance.crash();
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   runApp(const MyApp());
+  // Simulacion de un error.
+  // Future.delayed(const Duration(seconds: 2), () {
+  //   FirebaseCrashlytics.instance.crash();
+  // });
 }
 
 class MyApp extends StatelessWidget {
