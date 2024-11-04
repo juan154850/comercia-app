@@ -9,6 +9,8 @@ import "package:myapp/screens/profile/profile_screen.dart";
 import 'package:myapp/screens/splash_screen.dart';
 
 import 'firebase_options.dart';
+import 'package:firebase_performance/firebase_performance.dart';
+
 
 
 
@@ -18,6 +20,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  FirebasePerformance performance = FirebasePerformance.instance;
+  await performance.setPerformanceCollectionEnabled(true);
   runApp(const MyApp());
   // Simulacion de un error.
   // Future.delayed(const Duration(seconds: 2), () {
