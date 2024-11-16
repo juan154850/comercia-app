@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "552422971162",
     "project_id": "comercia-app",
-    "storage_bucket": "comercia-app.appspot.com"
+    "storage_bucket": "comercia-app.firebasestorage.app"
   },
   "client": [
     {

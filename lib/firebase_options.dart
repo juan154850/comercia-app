@@ -57,6 +57,7 @@ class DefaultFirebaseOptions {
     appId: '1:552422971162:android:1bc65fd3643f4d12603ea3',
     messagingSenderId: '552422971162',
     projectId: 'comercia-app',
-    storageBucket: 'comercia-app.appspot.com',
+    storageBucket: 'comercia-app.firebasestorage.app',
   );
+
 }

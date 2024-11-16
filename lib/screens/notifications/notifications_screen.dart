@@ -35,6 +35,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       appBar: AppBar(
         title: const Text('Notificaciones'),
         centerTitle: true,
+        toolbarHeight: 100.0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
