@@ -7,10 +7,10 @@ import 'package:myapp/screens/login_screen.dart';
 import "package:myapp/screens/notifications/notifications_screen.dart";
 import "package:myapp/screens/profile/profile_screen.dart";
 import 'package:myapp/screens/splash_screen.dart';
-
+import 'package:myapp/screens/products/add_product_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_performance/firebase_performance.dart';
-
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 
 
@@ -18,6 +18,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+    await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.debug,
   );
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebasePerformance performance = FirebasePerformance.instance;
@@ -48,6 +51,7 @@ class MyApp extends StatelessWidget {
         '/cart': (context) => CartScreen(),
         '/notifications': (context) => NotificationsScreen(),
         '/profile': (context) => ProfileScreen(),
+        '/addProduct': (context) => const AddProductScreen(),
       },
     );
   }

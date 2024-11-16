@@ -35,6 +35,7 @@ class _CartScreenState extends State<CartScreen> {
       appBar: AppBar(
         title: const Text('Carrito de compras'),
         centerTitle: true,
+        toolbarHeight: 100.0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

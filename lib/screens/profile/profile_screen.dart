@@ -78,6 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Mi cuenta'),
+          toolbarHeight: 100.0,
           centerTitle: true,
           bottom: const TabBar(
             indicatorColor: Colors.green,

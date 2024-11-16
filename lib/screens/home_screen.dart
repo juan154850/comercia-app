@@ -12,7 +12,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-
   // Método para actualizar el índice cuando se selecciona una opción
   void _onItemTapped(int index) {
     if (index == 3) {
@@ -36,14 +35,21 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Pantalla de inicio'),
         centerTitle: true,
+        toolbarHeight: 100.0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Center(
-        ),
+        child: Center(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/addProduct');
+        },
+        child: const Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, // Evita que las opciones se redimensionen
+        type: BottomNavigationBarType
+            .fixed, 
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -62,26 +68,11 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Mi Perfil',
           ),
         ],
-        currentIndex: _selectedIndex, // Índice de la opción seleccionada
-        selectedItemColor: Colors.blue, // Color del ítem seleccionado
-        onTap: _onItemTapped, // Método que se llama al seleccionar una opción
+        currentIndex: _selectedIndex, 
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
       ),
     );
   }
 
-  // Método auxiliar para obtener el título de la página seleccionada
-  String _getPageTitle(int index) {
-    switch (index) {
-      case 0:
-        return 'Inicio';
-      case 1:
-        return 'Carrito';
-      case 2:
-        return 'Notificaciones';
-      case 3:
-        return 'Mi Perfil';
-      default:
-        return 'Inicio';
-    }
-  }
 }
