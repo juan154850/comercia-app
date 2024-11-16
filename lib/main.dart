@@ -11,10 +11,13 @@ import 'package:myapp/screens/products/add_product_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
