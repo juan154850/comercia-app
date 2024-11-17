@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: IntrinsicHeight(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   gradient: LinearGradient(
                 colors: [
                   Color(0xFF84EAE1),
@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginScreen()),
+                                  builder: (context) => const LoginScreen()),
                             );
                           },
                           child: const Text("Olvidaste tu contraseña?",
@@ -198,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => RegisterScreen()),
+                                    builder: (context) => const RegisterScreen()),
                               );
                             },
                             child: const Text("Registrarse",

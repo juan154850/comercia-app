@@ -16,7 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 1), () async {
+    Timer(const Duration(seconds: 1), () async {
       // Simula el chequeo de sesión activa o no
       bool isLoggedIn = await AuthService().checkSession(); // Este método sería parte de tu servicio de autenticación.
       
@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFF84EAE1),

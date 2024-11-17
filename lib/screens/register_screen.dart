@@ -41,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           child: IntrinsicHeight(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   gradient: LinearGradient(
                 colors: [
                   Color(0xFF84EAE1),
@@ -57,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     const SizedBox(height: 100.0),
-                    Text(
+                    const Text(
                       'Registro',
                       style: TextStyle(
                         color: Colors.white,
