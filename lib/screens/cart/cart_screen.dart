@@ -37,13 +37,13 @@ class _CartScreenState extends State<CartScreen> {
         centerTitle: true,
         toolbarHeight: 100.0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Espacio para otros elementos visuales en el futuro
-            const SizedBox(height: 20.0),
+            SizedBox(height: 20.0),
           ],
         ),
       ),

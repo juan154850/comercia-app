@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/services/product_service.dart';
+import 'package:myapp/notifiers/product_notifier.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -56,6 +57,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           images: _imageUrls,
           status: status,
           stock: stock);
+      productNotifier.notify();
       Navigator.pop(context);
     }
   }

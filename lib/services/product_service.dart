@@ -34,37 +34,59 @@ class ProductService {
     }
   }
 
-Future<String> uploadImage(File image) async {
-  final userId = _auth.currentUser?.uid;
-  if (userId == null) {
-    throw Exception("User not logged in");
-  }
-
-  // Genera un nombre de archivo único basado en el tiempo actual
-  final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-  final storageRef = _storage.ref().child('products/$userId/$timestamp.jpg');
-
-  try {
-    print("Intentando subir la imagen a la ruta: products/$userId/$timestamp.jpg");
-
-    // Verifica que el archivo realmente existe
-    if (!image.existsSync()) {
-      throw Exception("El archivo de imagen no existe en el dispositivo.");
+  Future<String> uploadImage(File image) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception("User not logged in");
     }
 
-    // Sube el archivo a Firebase Storage
-    await storageRef.putFile(image);
+    // Genera un nombre de archivo único basado en el tiempo actual
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final storageRef = _storage.ref().child('products/$userId/$timestamp.jpg');
 
-    // Obtén la URL de descarga
-    final downloadURL = await storageRef.getDownloadURL();
+    try {
+      print(
+          "Intentando subir la imagen a la ruta: products/$userId/$timestamp.jpg");
 
-    print("Subida exitosa. URL de descarga: $downloadURL");
-    return downloadURL;
-  } catch (e) {
-    print('Error al subir la imagen: $e');
-    throw Exception("Error al subir la imagen: $e");
+      // Verifica que el archivo realmente existe
+      if (!image.existsSync()) {
+        throw Exception("El archivo de imagen no existe en el dispositivo.");
+      }
+
+      // Sube el archivo a Firebase Storage
+      await storageRef.putFile(image);
+
+      // Obtén la URL de descarga
+      final downloadURL = await storageRef.getDownloadURL();
+
+      print("Subida exitosa. URL de descarga: $downloadURL");
+      return downloadURL;
+    } catch (e) {
+      print('Error al subir la imagen: $e');
+      throw Exception("Error al subir la imagen: $e");
+    }
   }
-}
 
+  Future<List<Map<String, dynamic>>> getAllProducts() async {
+    try {
+      final QuerySnapshot snapshot =
+          await _firestore.collection('products').get();
 
+      final products = snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          ...doc.data() as Map<String, dynamic>,
+        };
+      }).toList();
+
+            print('Productos obtenidos exitosamente: $products');
+      return products;
+
+    } catch (e) {
+
+      print('Error al obtener los productos: $e');
+      throw Exception('Error al obtener los productos: $e');
+
+    }
+  }
 }
