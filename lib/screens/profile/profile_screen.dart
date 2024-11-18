@@ -3,7 +3,9 @@
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/services/auth_service.dart';
+import 'package:myapp/services/product_service.dart';
 import 'package:myapp/services/user_service.dart';
+import 'package:myapp/screens/products/update_product.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,7 +16,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
-  final UserService _userService = UserService(); 
+  final UserService _userService = UserService();
+  final ProductService _productService = ProductService();
   int _selectedIndex = 3;
   late Trace _buildTrace;
 
@@ -23,6 +26,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String lastName = '';
   String phone = '';
   String profileImageUrl = '';
+  List<Map<String, dynamic>> userProducts =
+      []; // Lista de productos del usuario
+  bool _isLoadingProducts = true; // Controla el estado de carga de productos
 
   @override
   void initState() {
@@ -30,6 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _buildTrace = FirebasePerformance.instance.newTrace('profile_screen_build');
     _buildTrace.start();
     _fetchUserData();
+    _fetchUserProducts();
   }
 
   @override
@@ -46,6 +53,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
         lastName = userData['lastName'] ?? '';
         phone = userData['phone'] ?? '';
         profileImageUrl = userData['profile_image'] ?? '';
+      });
+    }
+  }
+
+  Future<void> _fetchUserProducts() async {
+    try {
+      final userId = _authService.getCurrentUser()?.uid;
+      if (userId == null) {
+        print('No user is logged in');
+        return;
+      }
+
+      final products = await _productService.getAllProducts();
+
+      setState(() {
+        // Filtrar solo productos creados por el usuario actual
+        userProducts = products.where((p) => p['userId'] == userId).toList();
+        _isLoadingProducts = false;
+      });
+    } catch (e) {
+      print('Error al cargar productos del usuario: $e');
+      setState(() {
+        _isLoadingProducts = false;
       });
     }
   }
@@ -118,78 +148,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Título de Productos Publicados
                   const Text(
                     'Productos publicados',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 10),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount:
-                        4, 
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                color: Colors.grey[
-                                    300], // Espacio reservado para la imagen
+                  _isLoadingProducts
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : userProducts.isEmpty
+                          ? const Center(
+                              child: Text('No tienes productos publicados.'),
+                            )
+                          : GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: 0.8,
                               ),
+                              itemCount: userProducts.length,
+                              itemBuilder: (context, index) {
+                                final product = userProducts[index];
+                                return GestureDetector(
+                                  onTap: () async {
+                                    final updated = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            EditProductPage(product: product),
+                                      ),
+                                    );
+                                    if (updated == true) {
+                                      _fetchUserProducts(); // Recarga los productos al regresar
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: Colors.grey.shade400),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: product['images'] != null &&
+                                                  product['images'].isNotEmpty
+                                              ? Image.network(
+                                                  product['images'][0],
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Container(
+                                                  color: Colors.grey[300],
+                                                  child: const Center(
+                                                    child: Text('Sin imagen'),
+                                                  ),
+                                                ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          product['name'] ?? 'Sin nombre',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '\$${product['price'] ?? '0.0'}',
+                                          style: const TextStyle(
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Producto ${index + 1}', // Nombre temporal del producto
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              '\$1,000', // Precio temporal
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // Definir aca la acción al presionar el botón para ver todos los productos del usuario.
-                      },
-                      child: const Text(
-                        'Ver todos',
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
-
-            // Contenido de la pestaña Configuración
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -217,17 +266,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ListTile(
                     leading: const Icon(Icons.account_balance_wallet_outlined),
                     title: const Text('Historial de transacciones'),
-                    onTap: () {
-                      // Acción al presionar, se añadirá en el futuro
-                    },
+                    onTap: () {},
                   ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.rate_review_outlined),
                     title: const Text('Reseñas'),
-                    onTap: () {
-                      // Acción al presionar, se añadirá en el futuro
-                    },
+                    onTap: () {},
                   ),
                   const Divider(),
                   const Spacer(),

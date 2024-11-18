@@ -102,4 +102,42 @@ class ProductService {
       throw Exception('Error al obtener productos filtrados: $e');
     }
   }
+
+  Future<void> updateProduct({
+    required String productId,
+    required String name,
+    required double price,
+    required int stock,
+    required String description,
+  }) async {
+    try {
+      await _firestore.collection('products').doc(productId).update({
+        'name': name,
+        'price': price,
+        'stock': stock,
+        'description': description,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Producto actualizado exitosamente.');
+    } catch (e) {
+      print('Error al actualizar el producto: $e');
+      throw Exception('Error al actualizar el producto: $e');
+    }
+  }
+
+  Future<void> updateProductImages({
+    required String productId,
+    required List<String> images,
+  }) async {
+    try {
+      await _firestore.collection('products').doc(productId).update({
+        'images': images,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Imágenes del producto actualizadas exitosamente.');
+    } catch (e) {
+      print('Error al actualizar las imágenes del producto: $e');
+      throw Exception('Error al actualizar las imágenes del producto: $e');
+    }
+  }
 }
