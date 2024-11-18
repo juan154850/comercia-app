@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -67,10 +68,25 @@ class ProductService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getAllProducts() async {
+  Future<List<Map<String, dynamic>>> getAllProducts(
+      {Map<String, dynamic>? filters}) async {
     try {
-      final QuerySnapshot snapshot =
-          await _firestore.collection('products').get();
+      Query query = _firestore.collection('products');
+
+      // Aplica filtros
+      if (filters != null) {
+        if (filters['status'] != null) {
+          query = query.where('status', isEqualTo: filters['status']);
+        }
+        if (filters['priceRange'] != null) {
+          RangeValues range = filters['priceRange'];
+          query = query
+              .where('price', isGreaterThanOrEqualTo: range.start)
+              .where('price', isLessThanOrEqualTo: range.end);
+        }
+      }
+
+      final QuerySnapshot snapshot = await query.get();
 
       final products = snapshot.docs.map((doc) {
         return {
@@ -79,14 +95,11 @@ class ProductService {
         };
       }).toList();
 
-            print('Productos obtenidos exitosamente: $products');
+      print('Productos filtrados obtenidos exitosamente: $products');
       return products;
-
     } catch (e) {
-
-      print('Error al obtener los productos: $e');
-      throw Exception('Error al obtener los productos: $e');
-
+      print('Error al obtener productos filtrados: $e');
+      throw Exception('Error al obtener productos filtrados: $e');
     }
   }
 }
