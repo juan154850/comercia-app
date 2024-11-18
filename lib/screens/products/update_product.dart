@@ -75,6 +75,64 @@ class _EditProductPageState extends State<EditProductPage> {
     }
   }
 
+  Future<void> _deleteProduct() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Eliminar Producto'),
+          content:
+              const Text('Esta acción no se podrá reversar, ¿desea continuar?'),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, false),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Fondo rojo
+                foregroundColor: Colors.white, // Texto blanco
+              ),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  side: const BorderSide(color: Color(0xFF007AFF)),
+                ),
+              ),
+              child: const Text(
+                'Continuar',
+                style: TextStyle(color: Color(0xFF007AFF)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        await _productService.deleteProduct(widget.product['id']);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Producto eliminado exitosamente')),
+        );
+        Navigator.pop(context, true); // Vuelve a la pantalla anterior
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _selectAndUploadImage() async {
     final picker = ImagePicker();
     final XFile? pickedImage =
@@ -250,12 +308,31 @@ class _EditProductPageState extends State<EditProductPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _updateProduct,
-                        child: const Text('Actualizar Producto'),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _updateProduct,
+                            child: const Text(
+                              'Actualizar Producto',
+                              style: TextStyle(color: Color(0xFF007AFF)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _deleteProduct,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors
+                                  .white, // Cambia el color del texto a blanco
+                            ),
+                            child: const Text('Eliminar Producto'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

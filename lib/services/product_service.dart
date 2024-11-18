@@ -140,4 +140,16 @@ class ProductService {
       throw Exception('Error al actualizar las imágenes del producto: $e');
     }
   }
+
+  Future<void> deleteProduct(String productId) async {
+  try {
+    await _firestore.collection('products').doc(productId).delete();
+    print('Producto eliminado exitosamente.');
+  } catch (e) {
+    print('Error al eliminar el producto: $e');
+    throw Exception('Error al eliminar el producto: $e');
+  }
+}
+
+
 }
