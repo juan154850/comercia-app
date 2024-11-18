@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/services/product_service.dart';
 import 'package:myapp/notifiers/product_notifier.dart';
+import 'package:myapp/screens/products/product_detail.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -104,73 +105,85 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: _products.length,
                     itemBuilder: (context, index) {
                       final product = _products[index];
-                      return Container(
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: product['images'] != null &&
-                                      product['images'].isNotEmpty
-                                  ? Image.network(
-                                      product['images'][0],
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Container(
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                        child: Text('Sin imagen'),
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductDetailPage(product: product),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: product['images'] != null &&
+                                        product['images'].isNotEmpty
+                                    ? Image.network(
+                                        product['images'][0],
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        color: Colors.grey[300],
+                                        child: const Center(
+                                          child: Text('Sin imagen'),
+                                        ),
+                                      ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                product['name'] ?? 'Sin nombre',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '\$${product['price'] ?? '0'}',
+                                    style: const TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      color: product['status'] == 'Nuevo'
+                                          ? Colors.blue[100]
+                                          : Colors.orange[100],
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Text(
+                                      product['status'] ?? 'Desconocido',
+                                      style: TextStyle(
+                                        color: product['status'] == 'Nuevo'
+                                            ? Colors.blue[800]
+                                            : Colors.orange[800],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
                                       ),
                                     ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              product['name'] ?? 'Sin nombre',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                                  ),
+                                ],
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '\$${product['price'] ?? '0'}',
-                                  style: const TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4.0),
-                                  decoration: BoxDecoration(
-                                    color: product['status'] == 'Nuevo'
-                                        ? Colors.blue[100]
-                                        : Colors.orange[100],
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Text(
-                                    product['status'] ?? 'Desconocido',
-                                    style: TextStyle(
-                                      color: product['status'] == 'Nuevo'
-                                          ? Colors.blue[800]
-                                          : Colors.orange[800],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
