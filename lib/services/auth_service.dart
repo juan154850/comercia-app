@@ -5,9 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Importa Firestore
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Instancia de Firestore
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance; // Instancia de Firestore
 
-  Future<User?> signInWithEmailAndPassword(String email, String password) async {
+  Future<User?> signInWithEmailAndPassword(
+      String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -20,11 +22,12 @@ class AuthService {
     }
   }
 
-  Future<User?> registerWithEmailAndPassword(
-      String email, String password, String firstName, String lastName, String phone) async {
+  Future<User?> registerWithEmailAndPassword(String email, String password,
+      String firstName, String lastName, String phone) async {
     try {
       // Registrar al usuario con Firebase Authentication
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -37,7 +40,8 @@ class AuthService {
           'lastName': lastName,
           'phone': phone,
           'email': email,
-          'createdAt': FieldValue.serverTimestamp(), // Agrega la fecha de creación
+          'createdAt':
+              FieldValue.serverTimestamp(), // Agrega la fecha de creación
         });
 
         return user; // Retorna el usuario si el registro es exitoso
@@ -57,5 +61,9 @@ class AuthService {
 
   Future<void> signOut() async {
     await _auth.signOut(); // Cierra la sesión
+  }
+
+  User? getCurrentUser() {
+    return _auth.currentUser;
   }
 }
