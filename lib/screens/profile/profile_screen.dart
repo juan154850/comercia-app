@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/services/auth_service.dart';
 import 'package:myapp/services/product_service.dart';
 import 'package:myapp/services/user_service.dart';
+import 'package:myapp/screens/products/update_product.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -173,50 +174,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               itemCount: userProducts.length,
                               itemBuilder: (context, index) {
                                 final product = userProducts[index];
-                                return Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(10),
-                                    border:
-                                        Border.all(color: Colors.grey.shade400),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: product['images'] != null &&
-                                                product['images'].isNotEmpty
-                                            ? Image.network(
-                                                product['images'][0],
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Container(
-                                                color: Colors.grey[300],
-                                                child: const Center(
-                                                  child: Text('Sin imagen'),
+                                return GestureDetector(
+                                  onTap: () async {
+                                    final updated = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            EditProductPage(product: product),
+                                      ),
+                                    );
+                                    if (updated == true) {
+                                      _fetchUserProducts(); // Recarga los productos al regresar
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: Colors.grey.shade400),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: product['images'] != null &&
+                                                  product['images'].isNotEmpty
+                                              ? Image.network(
+                                                  product['images'][0],
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Container(
+                                                  color: Colors.grey[300],
+                                                  child: const Center(
+                                                    child: Text('Sin imagen'),
+                                                  ),
                                                 ),
-                                              ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        product['name'] ?? 'Sin nombre',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '\$${product['price'] ?? '0.0'}',
-                                        style: const TextStyle(
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold,
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          product['name'] ?? 'Sin nombre',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '\$${product['price'] ?? '0.0'}',
+                                          style: const TextStyle(
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 );
                               },
