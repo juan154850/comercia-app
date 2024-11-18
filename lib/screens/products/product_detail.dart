@@ -1,8 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myapp/services/comments_service.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  final Map<String, dynamic> product; // Recibe el producto como parámetro
+  final Map<String, dynamic> product;
 
   const ProductDetailPage({super.key, required this.product});
 
@@ -12,11 +16,10 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _quantity = 1;
-  final CommentsService _commentsService =
-      CommentsService(); // Instancia del servicio
-  List<Map<String, dynamic>> _comments = []; // Lista de comentarios
-  bool _isLoadingComments = true; // Controla el estado de carga de comentarios
-  int _currentImageIndex = 0; // Índice de la imagen actualmente mostrada
+  final CommentsService _commentsService = CommentsService();
+  List<Map<String, dynamic>> _comments = [];
+  bool _isLoadingComments = true;
+  int _currentImageIndex = 0;
 
   @override
   void initState() {
@@ -48,9 +51,70 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
+  Future<void> _addToCart() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Obtener el carrito actual como una lista de cadenas JSON
+    List<String> cart = prefs.getStringList('cart') ?? [];
+
+    // Buscar el producto existente
+    int existingProductIndex = cart.indexWhere((item) {
+      final decodedItem = jsonDecode(item); 
+      return decodedItem['id'] == widget.product['id'];
+    });
+
+    if (existingProductIndex != -1) {
+      // Incrementar la cantidad si el producto ya está en el carrito
+      final existingProduct = jsonDecode(cart[existingProductIndex]);
+
+      // Validar que no se exceda el stock disponible
+      if ((existingProduct['quantity'] + _quantity) > widget.product['stock']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'No puedes añadir más de ${widget.product['stock']} unidades al carrito'),
+          ),
+        );
+        return;
+      }
+
+      existingProduct['quantity'] += _quantity;
+      cart[existingProductIndex] = jsonEncode(existingProduct);
+    } else {
+      // Validar que no se exceda el stock disponible al añadir un nuevo producto
+      if (_quantity > widget.product['stock']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'No puedes añadir más de ${widget.product['stock']} unidades al carrito'),
+          ),
+        );
+        return;
+      }
+
+      // Agregar el producto al carrito
+      cart.add(jsonEncode({
+        'id': widget.product['id'],
+        'name': widget.product['name'],
+        'price': widget.product['price'],
+        'images': widget.product['images']?.isNotEmpty == true
+            ? widget.product['images'][0]
+            : null,
+        'quantity': _quantity,
+      }));
+    }
+
+    // Guardar el carrito actualizado como lista de cadenas JSON
+    await prefs.setStringList('cart', cart);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Producto añadido al carrito')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final product = widget.product; // Accede al producto pasado como parámetro
+    final product = widget.product;
     final stock = product['stock'] ?? 0;
     final images = product['images'] ?? [];
 
@@ -62,7 +126,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Imagen principal del producto
             if (images.isNotEmpty)
               Column(
                 children: [
@@ -144,45 +207,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      // Forma en la que se generan las estrellas dinamicas...
-                      Row(
-                        children: List.generate(
-                          (() {
-                            if (product['rateAverage'] != null) {
-                              if (product['rateAverage'] is int) {
-                                return product['rateAverage'];
-                              } else if (product['rateAverage'] is double) {
-                                return product['rateAverage'].round();
-                              }
-                            }
-                            return 4; // Valor por defecto
-                          })(),
-                          (index) => const Icon(Icons.star,
-                              color: Colors.amber, size: 20),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        (() {
-                          if (product['rateAverage'] != null) {
-                            if (product['rateAverage'] is int) {
-                              return product['rateAverage'].toString();
-                            } else if (product['rateAverage'] is double) {
-                              return product['rateAverage'].toStringAsFixed(1);
-                            }
-                          }
-                          return '0.0'; // Valor por defecto
-                        })(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -216,16 +240,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ],
                       ),
                       ElevatedButton(
-                        onPressed: stock > 0
-                            ? () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Añadido al carrito'),
-                                  ),
-                                );
-                              }
-                            : null,
-                        child: const Text('Añadir al carrito'),
+                        onPressed: stock > 0 ? _addToCart : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              stock > 0 ? const Color(0xFF007AFF) : Colors.grey,
+                        ),
+                        child: const Text(
+                          'Añadir al carrito',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
@@ -294,16 +317,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                               comment['comment'] ?? '',
                                               style: const TextStyle(
                                                 fontSize: 14,
-                                              ),
-                                            ),
-                                            Row(
-                                              children: List.generate(
-                                                comment['rate'] ?? 0,
-                                                (index) => const Icon(
-                                                  Icons.star,
-                                                  color: Colors.blue,
-                                                  size: 16,
-                                                ),
                                               ),
                                             ),
                                           ],

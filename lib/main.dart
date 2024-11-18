@@ -11,26 +11,39 @@ import 'package:myapp/screens/products/add_product_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-// import 'package:myapp/screens/test_screen.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() async {
-  // await dotenv.load(fileName: ".env");
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Activar App Check en modo debug
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.debug,
   );
+
+  // Configurar Crashlytics para capturar errores
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  // Activar Performance Monitoring
   FirebasePerformance performance = FirebasePerformance.instance;
   await performance.setPerformanceCollectionEnabled(true);
+
+  // Limpia SharedPreferences temporalmente
+  await clearSharedPreferences(); // Llama a la función de limpieza aquí
+
   runApp(const MyApp());
-  // Simulacion de un error.
-  // Future.delayed(const Duration(seconds: 2), () {
-  //   FirebaseCrashlytics.instance.crash();
-  // });
+}
+
+// Función para limpiar SharedPreferences
+Future<void> clearSharedPreferences() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+  print("SharedPreferences limpiado."); // Mensaje para confirmar limpieza
 }
 
 class MyApp extends StatelessWidget {
@@ -46,7 +59,6 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),
-        // '/test': (context) => const TestScreen(),
         '/login': (context) => const LoginScreen(),
         '/forgotPassword': (context) =>
             const LoginScreen(), //pendiente de implementación.
