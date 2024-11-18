@@ -225,7 +225,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 );
                               }
                             : null,
-                        child: const Text('Añadir al carrito'),
+                        child: const Text('Añadir al carrito', style: TextStyle(color: Color(0xFF007AFF)),),
                       ),
                     ],
                   ),
