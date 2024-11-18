@@ -1,19 +1,36 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
-
-import './screens/splash_screen.dart';
+import 'package:myapp/screens/cart/cart_screen.dart';
+import 'package:myapp/screens/home_screen.dart';
+import 'package:myapp/screens/login_screen.dart';
+import "package:myapp/screens/notifications/notifications_screen.dart";
+import "package:myapp/screens/profile/profile_screen.dart";
+import 'package:myapp/screens/splash_screen.dart';
+import 'package:myapp/screens/products/add_product_screen.dart';
 import 'firebase_options.dart';
-import 'screens/login_screen.dart';
-// Esta pantalla sería la de login
-import './screens/home_screen.dart'; // Esta pantalla sería la home
-
+import 'package:firebase_performance/firebase_performance.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+// import 'package:myapp/screens/test_screen.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  // await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.debug,
+  );
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  FirebasePerformance performance = FirebasePerformance.instance;
+  await performance.setPerformanceCollectionEnabled(true);
   runApp(const MyApp());
+  // Simulacion de un error.
+  // Future.delayed(const Duration(seconds: 2), () {
+  //   FirebaseCrashlytics.instance.crash();
+  // });
 }
 
 class MyApp extends StatelessWidget {
@@ -29,8 +46,15 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),
-        '/login': (context) => LoginScreen(), 
-        '/home': (context) => HomeScreen(),
+        // '/test': (context) => const TestScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/forgotPassword': (context) =>
+            const LoginScreen(), //pendiente de implementación.
+        '/home': (context) => const HomeScreen(),
+        '/cart': (context) => const CartScreen(),
+        '/notifications': (context) => const NotificationsScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/addProduct': (context) => const AddProductScreen(),
       },
     );
   }
