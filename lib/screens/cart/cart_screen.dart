@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:myapp/screens/payments/payment_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -154,7 +155,13 @@ class _CartScreenState extends State<CartScreen> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    // Implementar funcionalidad de pago
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PaymentScreen(orderTotal: _total), // Pasa el total
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(),
                   child: const Text(
