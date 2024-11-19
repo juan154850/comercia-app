@@ -59,7 +59,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     // Buscar el producto existente
     int existingProductIndex = cart.indexWhere((item) {
-      final decodedItem = jsonDecode(item); 
+      final decodedItem = jsonDecode(item);
       return decodedItem['id'] == widget.product['id'];
     });
 
@@ -101,6 +101,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ? widget.product['images'][0]
             : null,
         'quantity': _quantity,
+        'userId': widget.product['userId'], // Incluye el ID del vendedor
       }));
     }
 
