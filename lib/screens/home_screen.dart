@@ -129,15 +129,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Navegación entre pantallas
   void _onItemTapped(int index) {
-    if (index == 3) {
+    if (index == 2) {
       Navigator.pushNamed(context, '/profile');
     } else if (index == 0) {
       Navigator.pushNamed(context, '/home');
     } else if (index == 1) {
       Navigator.pushNamed(context, '/cart');
-    } else if (index == 2) {
-      Navigator.pushNamed(context, '/notifications');
-    } else {
+    } 
+    // else if (index == 2) {
+    //   Navigator.pushNamed(context, '/notifications');
+    // } 
+    else {
       setState(() {
         _selectedIndex = index;
       });
@@ -310,10 +312,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.shopping_cart),
             label: 'Carrito',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notificaciones',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.notifications),
+          //   label: 'Notificaciones',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Mi Perfil',

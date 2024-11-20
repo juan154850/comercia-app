@@ -19,7 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
   final ProductService _productService = ProductService();
-  int _selectedIndex = 3;
+  int _selectedIndex = 2;
   late Trace _buildTrace;
 
   // Variables para los datos del perfil
@@ -87,18 +87,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _onItemTapped(int index) {
-    if (index == 3) {
-      Navigator.pushNamed(context, '/profile');
-    } else if (index == 0) {
+    if (index == 0) {
       Navigator.pushNamed(context, '/home');
     } else if (index == 1) {
       Navigator.pushNamed(context, '/cart');
     } else if (index == 2) {
-      Navigator.pushNamed(context, '/notifications');
-    } else {
-      setState(() {
-        _selectedIndex = index;
-      });
+      Navigator.pushNamed(context, '/profile');
     }
   }
 
@@ -278,12 +272,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                   const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.rate_review_outlined),
-                    title: const Text('Reseñas'),
-                    onTap: () {},
-                  ),
-                  const Divider(),
+                  // ListTile(
+                  //   leading: const Icon(Icons.rate_review_outlined),
+                  //   title: const Text('Reseñas'),
+                  //   onTap: () {},
+                  // ),
+                  // const Divider(),
                   const Spacer(),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -315,10 +309,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_cart),
               label: 'Carrito',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications),
-              label: 'Notificaciones',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

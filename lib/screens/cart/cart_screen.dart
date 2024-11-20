@@ -51,9 +51,11 @@ class _CartScreenState extends State<CartScreen> {
       Navigator.pushNamed(context, '/home');
     } else if (index == 1) {
       Navigator.pushNamed(context, '/cart');
-    } else if (index == 2) {
-      Navigator.pushNamed(context, '/notifications');
-    } else if (index == 3) {
+    } 
+    // else if (index == 2) {
+    //   Navigator.pushNamed(context, '/notifications');
+    // }
+     else if (index == 2) {
       Navigator.pushNamed(context, '/profile');
     } else {
       setState(() {
@@ -186,10 +188,10 @@ class _CartScreenState extends State<CartScreen> {
             icon: Icon(Icons.shopping_cart),
             label: 'Carrito',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notificaciones',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.notifications),
+          //   label: 'Notificaciones',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Mi Perfil',
