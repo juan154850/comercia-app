@@ -6,6 +6,7 @@ import 'package:myapp/services/auth_service.dart';
 import 'package:myapp/services/product_service.dart';
 import 'package:myapp/services/user_service.dart';
 import 'package:myapp/screens/products/update_product.dart';
+import 'package:myapp/screens/profile/transaction_history_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -266,7 +267,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ListTile(
                     leading: const Icon(Icons.account_balance_wallet_outlined),
                     title: const Text('Historial de transacciones'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const TransactionHistoryScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(),
                   ListTile(
