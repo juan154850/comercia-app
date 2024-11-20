@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myapp/services/comments_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class ProductDetailPage extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -20,11 +22,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   List<Map<String, dynamic>> _comments = [];
   bool _isLoadingComments = true;
   int _currentImageIndex = 0;
+  bool _isOwner = false;
 
   @override
   void initState() {
     super.initState();
+    _checkOwnership();
     _fetchComments();
+  }
+
+  Future<void> _checkOwnership() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      setState(() {
+        _isOwner = currentUser.uid == widget.product['userId'];
+      });
+    }
   }
 
   Future<void> _fetchComments() async {
@@ -142,21 +155,86 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             });
                           },
                           itemBuilder: (context, index) {
-                            return Image.network(
-                              images[index],
-                              fit: BoxFit.cover,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return const Center(
-                                  child: CircularProgressIndicator(),
+                            return GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return Dialog(
+                                      backgroundColor: Colors.transparent,
+                                      child: StatefulBuilder(
+                                        builder: (context, setState) {
+                                          return Stack(
+                                            children: [
+                                              PageView.builder(
+                                                itemCount: images.length,
+                                                controller: PageController(
+                                                    initialPage:
+                                                        _currentImageIndex),
+                                                onPageChanged: (index) {
+                                                  setState(() {
+                                                    _currentImageIndex = index;
+                                                  });
+                                                },
+                                                itemBuilder: (context, index) {
+                                                  return InteractiveViewer(
+                                                    panEnabled: true,
+                                                    boundaryMargin:
+                                                        const EdgeInsets.all(
+                                                            20),
+                                                    minScale: 0.5,
+                                                    maxScale: 4.0,
+                                                    child: Image.network(
+                                                      images[index],
+                                                      fit: BoxFit.contain,
+                                                      errorBuilder: (context,
+                                                              error,
+                                                              stackTrace) =>
+                                                          const Center(
+                                                        child: Icon(
+                                                          Icons.error,
+                                                          color: Colors.red,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                              Positioned(
+                                                top: 16,
+                                                right: 16,
+                                                child: IconButton(
+                                                  icon: const Icon(Icons.close,
+                                                      color: Colors.white),
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
                                 );
                               },
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Center(
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.red,
+                              child: Image.network(
+                                images[index],
+                                fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                  ),
                                 ),
                               ),
                             );
@@ -241,18 +319,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ],
                       ),
                       ElevatedButton(
-                        onPressed: stock > 0 ? _addToCart : null,
+                        onPressed: stock > 0 && !_isOwner ? _addToCart : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              stock > 0 ? const Color(0xFF007AFF) : Colors.grey,
+                          backgroundColor: stock > 0 && !_isOwner
+                              ? const Color(0xFF007AFF)
+                              : Colors.grey,
                         ),
-                        child: const Text(
-                          'Añadir al carrito',
-                          style: TextStyle(color: Colors.white),
+                        child: Text(
+                          _isOwner
+                              ? 'No puedes comprar tu producto'
+                              : 'Añadir al carrito',
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: List.generate(
+                      product['rateAverage'].toInt(),
+                      (index) => const Icon(Icons.star, color: Colors.amber),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   const SizedBox(height: 16),
                   const Text(
                     'Descripción',
@@ -310,15 +399,23 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                             Text(
                                               user['firstName'] ?? 'Usuario',
                                               style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: List.generate(
+                                                (comment['rate'] ?? 0).toInt(),
+                                                (index) => const Icon(
+                                                    Icons.star,
+                                                    color: Colors.amber,
+                                                    size: 16),
                                               ),
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
                                               comment['comment'] ?? '',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                              ),
+                                              style:
+                                                  const TextStyle(fontSize: 14),
                                             ),
                                           ],
                                         ),
