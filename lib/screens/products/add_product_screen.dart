@@ -27,7 +27,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Subir cada imagen seleccionada a Firebase Storage
       for (File image in _selectedImages) {
         try {
           String imageUrl = await _productService.uploadImage(image);
@@ -37,13 +36,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
         }
       }
 
-      // Si no hay URLs de imágenes, no se envía el producto
       if (_imageUrls.isEmpty) {
         print('No se pudo subir ninguna imagen.');
         return;
       }
 
-      // Agregar el producto a Firestore con las URLs de imágenes
       final name = _nameController.text;
       final price = double.tryParse(_priceController.text) ?? 0.0;
       final stock = int.tryParse(_stockController.text) ?? 0;
@@ -51,12 +48,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
       final status = _status ?? 'Nuevo';
 
       await _productService.addProduct(
-          name: name,
-          price: price,
-          description: description,
-          images: _imageUrls,
-          status: status,
-          stock: stock);
+        name: name,
+        price: price,
+        description: description,
+        images: _imageUrls,
+        status: status,
+        stock: stock,
+      );
+
       productNotifier.notify();
       Navigator.pop(context);
     }
@@ -69,7 +68,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
       setState(() {
-        _selectedImages.add(imageFile); // Guardar solo el archivo local
+        _selectedImages.add(imageFile);
       });
     } else {
       print("No se seleccionó ninguna imagen.");
@@ -80,32 +79,53 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Creación de nuevo producto'),
+        title: const Text(
+          'Crear Nuevo Producto',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        //hacer que tenga un margen top
-        toolbarHeight: 100.0,
+        toolbarHeight: 80.0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Input: Nombre
+              const Text(
+                'Nombre del Producto',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                    labelText: 'Nombre del producto',
-                    labelStyle: TextStyle(fontSize: 20)),
+                decoration: InputDecoration(
+                  hintText: 'Ejemplo: Smartphone Samsung',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Este campo es requerido'
+                    ? 'Este campo es obligatorio'
                     : null,
               ),
               const SizedBox(height: 20),
+
+              // Dropdown: Estado del Producto
+              const Text(
+                'Estado del Producto',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: _status,
-                decoration: const InputDecoration(
-                    labelText: 'Estado del producto',
-                    labelStyle: TextStyle(fontSize: 20)),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                 items: const [
                   DropdownMenuItem(value: 'Nuevo', child: Text('Nuevo')),
                   DropdownMenuItem(value: 'Usado', child: Text('Usado')),
@@ -116,103 +136,170 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   });
                 },
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Este campo es requerido'
+                    ? 'Por favor selecciona el estado'
                     : null,
               ),
               const SizedBox(height: 20),
+
+              // Input: Descripción
+              const Text(
+                'Descripción',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                    labelText: 'Descripción',
-                    alignLabelWithHint: true,
-                    labelStyle: TextStyle(fontSize: 20)),
-                maxLines: null,
-                minLines: 5,
-                keyboardType: TextInputType.multiline,
+                maxLines: 5,
+                minLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Escribe una descripción detallada del producto.',
+                  alignLabelWithHint: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Este campo es requerido'
+                    ? 'Este campo es obligatorio'
                     : null,
               ),
               const SizedBox(height: 20),
+
+              // Input: Precio y Stock
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      controller: _priceController,
-                      decoration: const InputDecoration(
-                        labelText: 'Precio',
-                        labelStyle: TextStyle(fontSize: 20),
-                        hintText:
-                            '\$500', // Texto de fondo para indicar el formato esperado
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Este campo es requerido'
-                          : null,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Precio (\$)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _priceController,
+                          decoration: InputDecoration(
+                            hintText: 'Ejemplo: 500',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Este campo es obligatorio'
+                              : null,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 16), // Espacio entre los dos campos
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: TextFormField(
-                      controller: _stockController,
-                      decoration: const InputDecoration(
-                        labelText: 'Stock',
-                        labelStyle: TextStyle(fontSize: 20),
-                        hintText:
-                            '2', // Texto de fondo para indicar el formato esperado
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Este campo es requerido'
-                          : null,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Stock',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _stockController,
+                          decoration: InputDecoration(
+                            hintText: 'Ejemplo: 10',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Este campo es obligatorio'
+                              : null,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
+
+              // Botón: Seleccionar Imágenes
+              ElevatedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.add_photo_alternate, color: Colors.blue),
+                label: const Text(
+                  'Seleccionar Imágenes',
+                  style: TextStyle(color: Colors.blue),
+                ),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    side: const BorderSide(color: Color(0xFF007AFF)),
-                  ),
-                ),
-                onPressed: _pickImage,
-                child: const Text(
-                  'Seleccionar Imagenes',
-                  style: TextStyle(color: Color(0xFF007AFF)),
+                  side: const BorderSide(color: Colors.blue),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+
+              // Vista Previa de Imágenes
               if (_selectedImages.isNotEmpty)
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _selectedImages
-                      .map((file) => Image.file(
-                            file,
-                            width: 100,
-                            height: 100,
+                GridView.builder(
+                  itemCount: _selectedImages.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemBuilder: (context, index) {
+                    return Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.file(
+                            _selectedImages[index],
                             fit: BoxFit.cover,
-                          ))
-                      .toList(),
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedImages.removeAt(index);
+                              });
+                            },
+                            child: const CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.red,
+                              child: Icon(Icons.close, size: 16),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               const SizedBox(height: 24),
+
+              // Botón: Crear Producto
               ElevatedButton(
+                onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    side: const BorderSide(color: Color(0xFF007AFF)),
                   ),
                 ),
-                onPressed: _submitForm,
                 child: const Text(
                   'Crear Producto',
-                  style: TextStyle(color: Color(0xFF007AFF)),
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ],
