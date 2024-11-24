@@ -204,6 +204,9 @@ class ReviewScreen extends StatelessWidget {
                       productIds: productIds, // IDs de los productos comprados
                       orderTotal: orderTotal,
                     );
+                    
+                    await prefs.clear();
+                    print("Carrito de compras limpiado."); // Mensaje para confirmar limpieza
 
                     print(
                         'Transacción creada con éxito. ID de la orden: $orderId');

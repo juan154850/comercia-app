@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/forgotPassword': (context) =>
-            const LoginScreen(), //pendiente de implementación.
+            const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/cart': (context) => const CartScreen(),
         // '/notifications': (context) => const NotificationsScreen(),
