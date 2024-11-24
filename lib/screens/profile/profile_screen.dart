@@ -1,12 +1,16 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:io';
+
 import 'package:firebase_performance/firebase_performance.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/services/auth_service.dart';
 import 'package:myapp/services/product_service.dart';
 import 'package:myapp/services/user_service.dart';
 import 'package:myapp/screens/products/update_product.dart';
 import 'package:myapp/screens/profile/transaction_history_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -96,6 +100,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _changeProfilePicture() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final userId = _authService.getCurrentUser()?.uid;
+
+      if (userId == null) {
+        print('No user is logged in');
+        return;
+      }
+
+      final fileName = 'profile_$userId';
+      final storageRef =
+          FirebaseStorage.instance.ref().child('profiles/$fileName');
+
+      try {
+        //subir la nueva imagen
+        await storageRef.putFile(File(pickedFile.path));
+        final newProfileImageUrl = await storageRef.getDownloadURL();
+
+        //actualizar el campo de imagen del usuario
+        await _userService.updateProfileImage(userId, newProfileImageUrl);
+
+        setState(() {
+          profileImageUrl = newProfileImageUrl;
+        });
+        print('Imagen de perfil actualizada');
+      } catch (error) {
+        print('Error al actualizar la imagen de perfil: $error');
+      }
+    } else {
+      print('No se seleccionó ninguna imagen');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -122,14 +162,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Center(
                     child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage: profileImageUrl.isNotEmpty
-                              ? NetworkImage(profileImageUrl)
-                              : null,
-                          child: profileImageUrl.isEmpty
-                              ? const Icon(Icons.person, size: 40)
-                              : null,
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage: profileImageUrl.isNotEmpty
+                                  ? NetworkImage(profileImageUrl)
+                                  : null,
+                              child: profileImageUrl.isEmpty
+                                  ? const Icon(Icons.person, size: 40)
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: _changeProfilePicture,
+                                child: Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundImage:
+                                          profileImageUrl.isNotEmpty
+                                              ? NetworkImage(profileImageUrl)
+                                              : null,
+                                      child: profileImageUrl.isEmpty
+                                          ? const Icon(Icons.person, size: 40)
+                                          : null,
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: GestureDetector(
+                                        onTap: _changeProfilePicture,
+                                        child: const CircleAvatar(
+                                          radius: 12,
+                                          backgroundColor: Colors.blue,
+                                          child: Icon(Icons.edit,
+                                              size: 16, color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
