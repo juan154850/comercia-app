@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/cart/cart_screen.dart';
 import 'package:myapp/screens/home_screen.dart';
 import 'package:myapp/screens/login_screen.dart';
-import "package:myapp/screens/notifications/notifications_screen.dart";
+// import "package:myapp/screens/notifications/notifications_screen.dart";
 import "package:myapp/screens/profile/profile_screen.dart";
 import 'package:myapp/screens/splash_screen.dart';
 import 'package:myapp/screens/products/add_product_screen.dart';
@@ -61,10 +61,10 @@ class MyApp extends StatelessWidget {
         '/': (context) => SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/forgotPassword': (context) =>
-            const LoginScreen(), //pendiente de implementación.
+            const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/cart': (context) => const CartScreen(),
-        '/notifications': (context) => const NotificationsScreen(),
+        // '/notifications': (context) => const NotificationsScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/addProduct': (context) => const AddProductScreen(),
       },

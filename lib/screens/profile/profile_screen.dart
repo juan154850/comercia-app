@@ -1,11 +1,16 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:io';
+
 import 'package:firebase_performance/firebase_performance.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/services/auth_service.dart';
 import 'package:myapp/services/product_service.dart';
 import 'package:myapp/services/user_service.dart';
 import 'package:myapp/screens/products/update_product.dart';
+import 'package:myapp/screens/profile/transaction_history_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,7 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
   final ProductService _productService = ProductService();
-  int _selectedIndex = 3;
+  int _selectedIndex = 2;
   late Trace _buildTrace;
 
   // Variables para los datos del perfil
@@ -86,18 +91,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _onItemTapped(int index) {
-    if (index == 3) {
-      Navigator.pushNamed(context, '/profile');
-    } else if (index == 0) {
+    if (index == 0) {
       Navigator.pushNamed(context, '/home');
     } else if (index == 1) {
       Navigator.pushNamed(context, '/cart');
     } else if (index == 2) {
-      Navigator.pushNamed(context, '/notifications');
+      Navigator.pushNamed(context, '/profile');
+    }
+  }
+
+  Future<void> _changeProfilePicture() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final userId = _authService.getCurrentUser()?.uid;
+
+      if (userId == null) {
+        print('No user is logged in');
+        return;
+      }
+
+      final fileName = 'profile_$userId';
+      final storageRef =
+          FirebaseStorage.instance.ref().child('profiles/$fileName');
+
+      try {
+        //subir la nueva imagen
+        await storageRef.putFile(File(pickedFile.path));
+        final newProfileImageUrl = await storageRef.getDownloadURL();
+
+        //actualizar el campo de imagen del usuario
+        await _userService.updateProfileImage(userId, newProfileImageUrl);
+
+        setState(() {
+          profileImageUrl = newProfileImageUrl;
+        });
+        print('Imagen de perfil actualizada');
+      } catch (error) {
+        print('Error al actualizar la imagen de perfil: $error');
+      }
     } else {
-      setState(() {
-        _selectedIndex = index;
-      });
+      print('No se seleccionó ninguna imagen');
     }
   }
 
@@ -127,14 +162,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Center(
                     child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage: profileImageUrl.isNotEmpty
-                              ? NetworkImage(profileImageUrl)
-                              : null,
-                          child: profileImageUrl.isEmpty
-                              ? const Icon(Icons.person, size: 40)
-                              : null,
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage: profileImageUrl.isNotEmpty
+                                  ? NetworkImage(profileImageUrl)
+                                  : null,
+                              child: profileImageUrl.isEmpty
+                                  ? const Icon(Icons.person, size: 40)
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: _changeProfilePicture,
+                                child: Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundImage:
+                                          profileImageUrl.isNotEmpty
+                                              ? NetworkImage(profileImageUrl)
+                                              : null,
+                                      child: profileImageUrl.isEmpty
+                                          ? const Icon(Icons.person, size: 40)
+                                          : null,
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: GestureDetector(
+                                        onTap: _changeProfilePicture,
+                                        child: const CircleAvatar(
+                                          radius: 12,
+                                          backgroundColor: Colors.blue,
+                                          child: Icon(Icons.edit,
+                                              size: 16, color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -266,15 +341,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ListTile(
                     leading: const Icon(Icons.account_balance_wallet_outlined),
                     title: const Text('Historial de transacciones'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const TransactionHistoryScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.rate_review_outlined),
-                    title: const Text('Reseñas'),
-                    onTap: () {},
-                  ),
-                  const Divider(),
+                  // ListTile(
+                  //   leading: const Icon(Icons.rate_review_outlined),
+                  //   title: const Text('Reseñas'),
+                  //   onTap: () {},
+                  // ),
+                  // const Divider(),
                   const Spacer(),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -306,10 +389,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_cart),
               label: 'Carrito',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications),
-              label: 'Notificaciones',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
